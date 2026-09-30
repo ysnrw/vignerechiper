@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vigenere Cipher Simulator Pro</title>
+    <style>
+        /* === RESET & GLOBAL STYLES === */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f8fafc;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 40px 20px;
+        }
+
+        /* === GLASSMORPHISM CONTAINER === */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 35px;
+            width: 100%;
+            max-width: 800px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        .header-title {
+            text-align: center;
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+            background: linear-gradient(to right, #818cf8, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* === MODE SELECTOR (TABS) === */
+        .mode-selector {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 25px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            color: #94a3b8;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            background: rgba(99, 102, 241, 0.2);
+            color: #818cf8;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* === FORMS === */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .label-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 8px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: #cbd5e1;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Tombol Salin */
+        .btn-copy {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #a7f3d0;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: none; /* Disembunyikan saat kosong */
+        }
+
+        .btn-copy:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        textarea, input {
+            width: 100%;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            color: #f1f5f9;
+            font-family: 'Courier New', monospace;
+            font-size: 15px;
+            transition: all 0.3s ease;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea:focus, input:focus {
+            outline: none;
+            border-color: #818cf8;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        textarea[readonly] {
+            background: rgba(0, 0, 0, 0.3);
+            color: #a7f3d0;
+            cursor: default;
+        }
+
+        /* === ACTION BUTTON === */
+        .btn-process {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 10px;
+            margin-bottom: 30px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn-process:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(99, 102, 241, 0.4);
+        }
+
+        /* === EXPLANATION SECTION === */
+        .explanation-container {
+            display: none;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 25px;
+        }
+
+        .explanation-container h3 {
+            font-size: 1.1rem;
+            color: #e2e8f0;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        th {
+            color: #94a3b8;
+            font-weight: 500;
+            position: sticky;
+            top: 0;
+            background: rgba(15, 23, 42, 0.95);
+        }
+
+        td {
+            color: #cbd5e1;
+            font-family: 'Courier New', monospace;
+        }
+
+        .highlight {
+            color: #fca5a5;
+        }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.3); }
+    </style>
+</head>
+<body>
+
+    <div class="glass-panel">
+        <h1 class="header-title">Vigenere Cipher</h1>
+
+        <!-- Mode Selector -->
+        <div class="mode-selector">
+            <button class="mode-btn active" id="btn-mode-encrypt" onclick="setMode('encrypt')">Mode Enkripsi</button>
+            <button class="mode-btn" id="btn-mode-decrypt" onclick="setMode('decrypt')">Mode Dekripsi</button>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-group">
+            <div class="label-header">
+                <label id="label-input">Teks Asli (Plaintext)</label>
+            </div>
+            <textarea id="inputText" placeholder="Masukkan teks di sini..."></textarea>
+        </div>
+
+        <div class="input-group">
+            <div class="label-header">
+                <label>Kunci (Key)</label>
+            </div>
+            <input type="text" id="keyText" placeholder="Contoh: TEKKOM">
+        </div>
+
+        <button class="btn-process" id="btn-process" onclick="processCipher()">Eksekusi Enkripsi</button>
+
+        <!-- Output Area dengan Tombol Salin -->
+        <div class="input-group">
+            <div class="label-header">
+                <label id="label-output">Hasil Sandi (Ciphertext)</label>
+                <button id="btn-copy" class="btn-copy" onclick="copyResult()">Salin 📋</button>
+            </div>
+            <textarea id="outputText" readonly placeholder="Hasil akan muncul di sini..."></textarea>
+        </div>
+
+        <!-- Explanation Area -->
+        <div class="explanation-container" id="explanationBox">
+            <h3>Visualisasi Perhitungan Matematis (A=0, B=1 ... Z=25)</h3>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Karakter Input</th>
+                            <th>Karakter Kunci</th>
+                            <th>Rumus (Mod 26)</th>
+                            <th>Karakter Hasil</th>
+                        </tr>
+                    </thead>
+                    <tbody id="explanationBody">
+                        <!-- Baris penjelasan akan diinjeksi via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMode = 'encrypt';
+
+        // Ganti Mode
+        function setMode(mode) {
+            currentMode = mode;
+            const btnEncrypt = document.getElementById('btn-mode-encrypt');
+            const btnDecrypt = document.getElementById('btn-mode-decrypt');
+            const labelInput = document.getElementById('label-input');
+            const labelOutput = document.getElementById('label-output');
+            const btnProcess = document.getElementById('btn-process');
+            const btnCopy = document.getElementById('btn-copy');
+
+            // Reset UI
+            document.getElementById('inputText').value = '';
+            document.getElementById('outputText').value = '';
+            document.getElementById('explanationBox').style.display = 'none';
+            btnCopy.style.display = 'none'; // Sembunyikan tombol salin
+
+            if (mode === 'encrypt') {
+                btnEncrypt.classList.add('active');
+                btnDecrypt.classList.remove('active');
+                labelInput.innerText = 'Teks Asli (Plaintext)';
+                labelOutput.innerText = 'Hasil Sandi (Ciphertext)';
+                btnProcess.innerText = 'Eksekusi Enkripsi';
+            } else {
+                btnDecrypt.classList.add('active');
+                btnEncrypt.classList.remove('active');
+                labelInput.innerText = 'Teks Sandi (Ciphertext)';
+                labelOutput.innerText = 'Hasil Teks Asli (Plaintext)';
+                btnProcess.innerText = 'Eksekusi Dekripsi';
+            }
+        }
+
+        // Proses Kriptografi
+        function processCipher() {
+            let text = document.getElementById('inputText').value.toUpperCase();
+            let key = document.getElementById('keyText').value.toUpperCase().replace(/[^A-Z]/g, '');
+            let explanationBody = document.getElementById('explanationBody');
+            let btnCopy = document.getElementById('btn-copy');
+            
+            if (!text || !key) {
+                alert("Mohon isi teks dan kunci (pastikan kunci mengandung minimal 1 huruf alfabet)!");
+                return;
+            }
+
+            let result = "";
+            let keyIndex = 0;
+            let explanationHTML = "";
+            let isEncrypt = currentMode === 'encrypt';
+
+            for (let i = 0; i < text.length; i++) {
+                let charCode = text.charCodeAt(i);
+
+                if (charCode >= 65 && charCode <= 90) {
+                    let p = charCode - 65;
+                    let keyChar = key.charAt(keyIndex % key.length);
+                    let k = keyChar.charCodeAt(0) - 65;
+                    let c, formulaText;
+
+                    if (isEncrypt) {
+                        c = (p + k) % 26;
+                        formulaText = `(${p} + ${k}) mod 26 = <span class="highlight">${c}</span>`;
+                    } else {
+                        c = (p - k + 26) % 26;
+                        formulaText = `(${p} - ${k} + 26) mod 26 = <span class="highlight">${c}</span>`;
+                    }
+
+                    let outputChar = String.fromCharCode(c + 65);
+                    result += outputChar;
+
+                    explanationHTML += `
+                        <tr>
+                            <td>${text.charAt(i)} (${p})</td>
+                            <td>${keyChar} (${k})</td>
+                            <td>${formulaText}</td>
+                            <td><strong>${outputChar}</strong></td>
+                        </tr>
+                    `;
+                    keyIndex++;
+                } else {
+                    result += text.charAt(i);
+                    explanationHTML += `
+                        <tr>
+                            <td>'${text.charAt(i)}'</td>
+                            <td>-</td>
+                            <td><em style="color:#64748b">Bukan alfabet (diabaikan)</em></td>
+                            <td><strong>${text.charAt(i)}</strong></td>
+                        </tr>
+                    `;
+                }
+            }
+
+            // Tampilkan hasil dan tombol salin
+            document.getElementById('outputText').value = result;
+            document.getElementById('explanationBox').style.display = 'block';
+            explanationBody.innerHTML = explanationHTML;
+            btnCopy.style.display = 'inline-block';
+        }
+
+        // Fungsi Salin (Copy to Clipboard)
+        function copyResult() {
+            const outputText = document.getElementById('outputText');
+            const btnCopy = document.getElementById('btn-copy');
+
+            if (!outputText.value) return;
+
+            // Menggunakan API Clipboard modern
+            navigator.clipboard.writeText(outputText.value).then(() => {
+                // Beri efek visual bahwa teks berhasil disalin
+                btnCopy.innerHTML = 'Tersalin! ✔️';
+                btnCopy.style.color = '#86efac';
+                btnCopy.style.borderColor = '#86efac';
+
+                // Kembalikan tombol ke keadaan semula setelah 2 detik
+                setTimeout(() => {
+                    btnCopy.innerHTML = 'Salin 📋';
+                    btnCopy.style.color = '#a7f3d0';
+                    btnCopy.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+                }, 2000);
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+                alert("Gagal menyalin teks. Silakan salin secara manual.");
+            });
+        }
+    </script>
+</body>
+</html>
